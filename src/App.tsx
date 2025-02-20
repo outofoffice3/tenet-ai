@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import { useAuthenticator } from '@aws-amplify/ui-react'
+import { Card, useAuthenticator } from '@aws-amplify/ui-react'
+import { useAIConversation } from './client'
+import { AIConversation } from '@aws-amplify/ui-react-ai'
 
 function App() {
-  const [count, setCount] = useState(0)
   const { user, signOut } = useAuthenticator()
+  const [
+    {
+      data: { messages },
+      isLoading,
+    },
+    handleSendMessage,
+  ] = useAIConversation('chat')
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>{user.signInDetails?.loginId}</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+        <AIConversation
+        allowAttachments
+        avatars={{
+          user: {
+            username: user.signInDetails?.loginId
+          },
+          ai: { 
+            username : 'AI Assistant Heem'
+          }
+        }}
+        displayText={{
+          getMessageTimestampText: (date) => new Intl.DateTimeFormat('en-US', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+            hour12: true,
+            timeZone: 'UTC'
+          }).format(date),
+        }}
+          welcomeMessage={
+            <Card>
+              <p>I am your virtual assistant, ask me anything! </p>
+            </Card>
+          }
+          messages={messages}
+          isLoading={isLoading}
+          handleSendMessage={handleSendMessage}
+        />
       <button onClick={signOut}>Sign Out</button>
     </>
   )
